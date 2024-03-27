@@ -1,0 +1,13 @@
+.idea
+.vscode
+.vs
+
+.gitignore
+.dockerignore
+
+assets/
+
+.git
+README.md
+
+Dockerfile

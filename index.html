@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hash Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            margin-top: 50px;
+            position: relative;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="password"], input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            transition: opacity 0.5s;
+            position: relative;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .copy-btn {
+            background-color: #7899a4;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .copy-btn:hover {
+            background-color: #1d3a75;
+        }
+
+        .copy-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 1;
+        }
+        .hash-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .hash-title {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Hash Generator</h1>
+        <form id="hashForm">
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password"><br>
+            <input type="checkbox" id="showPassword">
+            <label for="showPassword">Show Password</label><br><br>
+            <button type="submit">Generate Hash</button>
+        </form>
+        <div id="result">
+            <div class="hash-container">
+                <h2 class="hash-title">Hashed password (bcrypt)</h2>
+                <pre id="hashed_password"></pre>
+                <button class="copy-btn copy-hash" id="copyHash">Copy</button>
+            </div>
+            <div class="hash-container">
+                <h2 class="hash-title">Base64 encoded:</h2>
+                <pre id="encoded_password"></pre>
+                <button class="copy-btn copy-encoded" id="copyEncoded">Copy</button>
+            </div>
+        </div>
+        <div class="copy-msg" id="copyMsg">Copied to clipboard</div>
+    </div>
+    <script>
+        document.getElementById("hashForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            let response = await fetch("/generate_hash", {
+                method: "POST",
+                body: formData
+            });
+            let data = await response.json();
+            document.getElementById("hashed_password").innerText = data.hashed_password;
+            document.getElementById("encoded_password").innerText = data.encoded_password;
+            document.getElementById("result").style.display = "block";
+        });
+
+        document.getElementById("showPassword").addEventListener("change", function() {
+            let passwordField = document.getElementById("password");
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+            } else {
+                passwordField.type = "password";
+            }
+        });
+
+        function copyToClipboard(elementId) {
+            let element = document.getElementById(elementId);
+            let text = element.innerText;
+            navigator.clipboard.writeText(text).then(function() {
+                document.getElementById("copyMsg").style.display = "block";
+                setTimeout(function() {
+                    document.getElementById("copyMsg").style.display = "none";
+                }, 1500);
+            }, function(err) {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        document.getElementById("copyHash").addEventListener("click", function() {
+            copyToClipboard("hashed_password");
+        });
+
+        document.getElementById("copyEncoded").addEventListener("click", function() {
+            copyToClipboard("encoded_password");
+        });
+    </script>
+</body>
+</html>
